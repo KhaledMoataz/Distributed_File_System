@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import sys
 import zmq
 import time
@@ -10,12 +10,11 @@ socket = context.socket(zmq.SUB)
 socket.setsockopt(zmq.RCVTIMEO, TIMEOUT)
 
 n = 0
-print "Connecting to data keepers"
+print("Connecting to data keepers")
 for i in range(1, len(sys.argv)):
     socket.connect("tcp://localhost:%s" % sys.argv[i])
     n += 1
 print("Connected to %d data keepers!" % n)
-
 
 # Subscribe to all topics
 socket.subscribe("")
