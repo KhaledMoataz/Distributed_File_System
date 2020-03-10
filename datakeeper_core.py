@@ -19,7 +19,7 @@ socket2.connect('tcp://{}:{}'.format('127.0.0.1',master_port))
 while True:
     request = socket.recv_string()
     if request.startswith("upload"):
-        transfer.download_from_client(socket, request)
+        size = transfer.download_from_client(socket, request)
     elif request.startswith("fetch"):
         transfer.upload_to_client(socket, request)
     elif request.startswith("replica"):
