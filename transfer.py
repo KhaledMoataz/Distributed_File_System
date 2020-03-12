@@ -3,6 +3,7 @@ import threading
 
 import parse
 import zmq
+import os
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -32,9 +33,9 @@ def download_from_client(socket, request):
     file = open(filename, "wb")
     has_next = True
     while has_next:
-        socket.send_string("fetch")
+        socket.send_string("")
         has_next = receive_chunk(file, socket)
-    socket.send_string("done")
+    socket.send_string("")
     size = file.tell()
     file.close()
     return size
@@ -61,7 +62,7 @@ def download_from_server(filename, filename_to_write, context, ip, port, start, 
     while True:
         if not receive_chunk(file, socket):
             break
-        socket.send_string("fetch")
+        socket.send_string("")
     file.close()
 
 
@@ -101,7 +102,9 @@ def download_from_servers(filename, context, ips, ports, size):
     file = open(filename + "_received", "wb")
     for i in range(len(ips)):
         threads[i].join()
-        file_to_merge = open(filename_base + str(i), "rb")
+        file_to_merge_name = filename_base + str(i)
+        file_to_merge = open(file_to_merge_name, "rb")
         file.write(file_to_merge.read())
         file_to_merge.close()
+        os.remove(file_to_merge_name)
     file.close()
