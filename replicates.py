@@ -4,6 +4,8 @@ import threading
 import parse
 import zmq
 
+import functions
+
 
 class Replicas:
 
@@ -39,53 +41,53 @@ class Replicas:
         'c.mp4': [4, 2]
     }
 
-    def get_available_port(id):
+    def get_available_port(self, id):
         r_port = -1  # keeps -1 if no port available....
-        for port in data_keeper_info[str(id)]['ports']:
-            if is_port_available[str(port)]:
+        for port in self.keepers[id][1]:
+            if self.keepers[id][1][port]:
                 r_port = port
                 break
         return r_port
 
-    def get_source_ip_port(self, file):
+    def get_source(self, file):
         for machine in self.videos[file][0]:
-            port = get_available_port(machine)
+            port = self.get_available_port(machine)
             if port != -1:
-                return data_keeper_info[str(machine)]['ip'], port
+                return machine, port
         return '', -1  # no source available....
 
-    def get_destination_ip_port(file):
-        for id in data_keeper_info.keys():
-            if int(id) in files[file]:
+    def get_destination(self, file):
+        for id in self.keepers.keys():
+            if int(id) in self.videos[file]:
                 continue
-            port = get_available_port(id)
+            port = self.get_available_port(id)
             if port != -1:
-                return data_keeper_info[str(id)]['ip'], port
+                return id, port
         return '', -1  # no available destination....
 
-    def activate(ports):
-        for port in ports:
-            is_port_available[str(port)] = True
+    def activate(self, ports):
+        for machine, port in ports:
+            functions.set_busy(self.keepers, self.lk, machine, port, False)
 
-    def deactivate(ports):
-        for port in ports:
-            is_port_available[str(port)] = False
+    def deactivate(self, ports):
+        for machine, port in ports:
+            functions.set_busy(self.keepers, self.lk, machine, port, True)
 
-    def inform_replicated(replica_port):
+    def inform_replicated(self, replica_port):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         socket.bind('tcp://127.0.0.1:{}'.format(replica_port))
         while True:
             request = socket.recv_string()
-            parsed_req = parse.parse('{} {} {} {}', request)
+            parsed_req = parse.parse('{} {} {} {}', request)            # TODO: recieve id of sender to use in activate
             file_name = str(parsed_req[0])
             id_machine = int(parsed_req[1])
             src_port = str(parsed_req[2])
             dst_port = str(parsed_req[3])
             # update look_up table...
-            files[file_name].append(id_machine)
+            functions.replicate(self.videos, self.lv, file_name, id_machine)
             socket.send_string('informed that file {} replicated in datakeeper {}'.format(file_name, id_machine))
-            activate([src_port, dst_port])
+            self.activate([(, src_port), (id_machine, dst_port)])       # TODO: need id of sending machine
 
     def manage_replications(self):
         rep_thread = threading.Thread(target=self.inform_replicated, args=[self.replica_port])
@@ -94,12 +96,12 @@ class Replicas:
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         while True:
-            sure_all_done = True
             for file in self.videos.keys():
                 if len(self.videos[file][0]) < self.replica_factor:
-                    sure_all_done = False
-                    src_ip, src_port = get_source_ip_port(str(file))
-                    dst_ip, dst_port = get_destination_ip_port(str(file))
+                    src_id, src_port = self.get_source(str(file))
+                    dst_id, dst_port = self.get_destination(str(file))
+                    src_ip = self.keepers[src_id][0]
+                    dst_ip = self.keepers[dst_id][0]
                     if src_port == -1:
                         print('no source machine available...')
                     elif dst_port == -1:
@@ -109,11 +111,10 @@ class Replicas:
                         request = 'replica {} {} {}'.format(file, src_ip, src_port)
                         socket.send_string(request)
                         response = socket.recv_string()
-                        deactivate([src_port, dst_port])
+                        self.deactivate([(src_id, src_port), (dst_id, dst_port)])
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))
-                if sure_all_done:
-                    print('all files have n replicas, yeah it is done :v')
+            print('all files have n replicas, yeah it is done :v')
 
 
 manage_replications(3, replica_port)
