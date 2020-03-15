@@ -1,5 +1,5 @@
 from multiprocessing import Manager, Process, Lock
-from functions import *
+import master_core
 
 if __name__ == '__main__':
     with Manager() as manager:
@@ -14,7 +14,7 @@ if __name__ == '__main__':
         processes = []
         
         for _ in range(2):
-            processes.append(Process(target=test, args=(videos, keepers, lv, lk)))
+            processes.append(Process(target=master_core.init_master_process, args=(videos, keepers, lv, lk)))
         
         for p in processes:
             p.start()
