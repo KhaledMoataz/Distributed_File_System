@@ -21,30 +21,10 @@ class Replicas:
     # this look up table holds the Ip of each data keeper and their ports indicating available/ not available ports...
     replica_port = sys.argv[1]
 
-    data_keeper_info = {
-        '1': {'ip': '127.0.0.1', 'ports': [5556]},
-        '2': {'ip': '127.0.0.1', 'ports': [5557]},
-        '3': {'ip': '127.0.0.1', 'ports': [5558]},
-        '4': {'ip': '127.0.0.1', 'ports': [5559]}
-    }
-
-    is_port_available = {
-        '5556': True,
-        '5557': True,
-        '5558': True,
-        '5559': True
-    }
-
-    files = {
-        'a.mp4': [1],
-        'b.mp4': [1, 2, 3],
-        'c.mp4': [4, 2]
-    }
-
-    def get_available_port(self, id):
+    def get_available_port(self, ip):
         r_port = -1  # keeps -1 if no port available....
-        for port in self.keepers[id][1]:
-            if self.keepers[id][1][port]:
+        for port in self.keepers[ip][1]:
+            if self.keepers[ip][1][port]:
                 r_port = port
                 break
         return r_port
@@ -57,12 +37,12 @@ class Replicas:
         return '', -1  # no source available....
 
     def get_destination(self, file):
-        for id in self.keepers.keys():
-            if int(id) in self.videos[file]:
+        for ip in self.keepers.keys():
+            if int(ip) in self.videos[file]:
                 continue
-            port = self.get_available_port(id)
+            port = self.get_available_port(ip)
             if port != -1:
-                return id, port
+                return ip, port
         return '', -1  # no available destination....
 
     def activate(self, ports):
@@ -79,15 +59,16 @@ class Replicas:
         socket.bind('tcp://127.0.0.1:{}'.format(replica_port))
         while True:
             request = socket.recv_string()
-            parsed_req = parse.parse('{} {} {} {}', request)            # TODO: recieve id of sender to use in activate
+            parsed_req = parse.parse('{} {} {} {} {}', request)
             file_name = str(parsed_req[0])
-            id_machine = int(parsed_req[1])
+            src_ip = int(parsed_req[1])
             src_port = str(parsed_req[2])
-            dst_port = str(parsed_req[3])
+            dst_ip = int(parsed_req[3])
+            dst_port = str(parsed_req[4])
             # update look_up table...
-            functions.replicate(self.videos, self.lv, file_name, id_machine)
-            socket.send_string('informed that file {} replicated in datakeeper {}'.format(file_name, id_machine))
-            self.activate([(, src_port), (id_machine, dst_port)])       # TODO: need id of sending machine
+            functions.replicate(self.videos, self.lv, file_name, dst_ip)
+            socket.send_string('informed that file {} replicated in datakeeper {}'.format(file_name, dst_ip))
+            self.activate([(src_ip, src_port), (dst_ip, dst_port)])
 
     def manage_replications(self):
         rep_thread = threading.Thread(target=self.inform_replicated, args=[self.replica_port])
@@ -98,10 +79,8 @@ class Replicas:
         while True:
             for file in self.videos.keys():
                 if len(self.videos[file][0]) < self.replica_factor:
-                    src_id, src_port = self.get_source(str(file))
-                    dst_id, dst_port = self.get_destination(str(file))
-                    src_ip = self.keepers[src_id][0]
-                    dst_ip = self.keepers[dst_id][0]
+                    src_ip, src_port = self.get_source(str(file))
+                    dst_ip, dst_port = self.get_destination(str(file))
                     if src_port == -1:
                         print('no source machine available...')
                     elif dst_port == -1:
@@ -111,7 +90,7 @@ class Replicas:
                         request = 'replica {} {} {}'.format(file, src_ip, src_port)
                         socket.send_string(request)
                         response = socket.recv_string()
-                        self.deactivate([(src_id, src_port), (dst_id, dst_port)])
+                        self.deactivate([(src_ip, src_port), (dst_ip, dst_port)])
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))
             print('all files have n replicas, yeah it is done :v')
