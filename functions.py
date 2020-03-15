@@ -12,9 +12,9 @@ def add_node(keepers, lk, node_ip, ports, is_alive):
 
 def add_port(keepers, lk, node_ip, port_no, is_busy):
     lk.acquire()
-    l = keepers[node_id]
+    l = keepers[node_ip]
     l[0][port_no] = is_busy
-    keepers[node_id] = l
+    keepers[node_ip] = l
     lk.release()
 
 
@@ -26,7 +26,7 @@ def replicate(videos, lv, name, node_ip):
     lv.release()
 
 
-def set_alive(keepers, lk, node_id, is_alive):
+def set_alive(keepers, lk, node_ip, is_alive):
     lk.acquire()
     l = keepers[node_ip]
     l[-1] = is_alive

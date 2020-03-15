@@ -1,5 +1,6 @@
 import sys
 import threading
+from time import sleep
 
 import parse
 import zmq
@@ -9,7 +10,7 @@ import functions
 
 class Replicas:
 
-    def __init__(self, replica_factor, replica_port, videos, keepers, lv, lk):
+    def __init__(self, replica_factor, replica_port, period, videos, keepers, lv, lk):
         self.replica_factor = replica_factor
         self.replica_port = replica_port
         self.videos = videos
@@ -94,6 +95,9 @@ class Replicas:
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))
             print('all files have n replicas, yeah it is done :v')
+            sleep(period)
 
 
-manage_replications(3, replica_port)
+def init_replica_process(replica_factor, replica_port, period, videos, keepers, lv, lk):
+    replica = Replicas(replica_factor, replica_port, period, videos, keepers, lv, lk)
+    replica.manage_replications()
