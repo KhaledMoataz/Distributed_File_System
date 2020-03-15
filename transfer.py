@@ -7,7 +7,7 @@ import os
 
 CHUNK_SIZE = 1024 * 1024
 
-
+#---------------------Generic Send/Receive Functions---------------------
 def send_chunk(file, socket, end):
     if end == -1:
         chunk_size = CHUNK_SIZE
@@ -28,6 +28,13 @@ def receive_chunk(file, socket):
     return True
 
 
+#---------------------Upload---------------------
+#*********Client Master Side*********
+# Client send upload request to master
+# Master responds with a data keeper port to upload to
+#*********Client Data Keeper Side*********
+# Client calls (upload_to_server) to sends an upload request to data keeper
+# Data keeper calls (download_from_client) for receiving and writing data
 def download_from_client(socket, request):
     filename = str(parse.parse("upload {}", request)[0])
     file = open(filename, "wb")
@@ -52,7 +59,13 @@ def upload_to_server(filename, context, ip, port):
         has_next = send_chunk(file, socket, -1)
     file.close()
 
-
+#---------------------Download---------------------
+#*********Client Master Side*********
+# Client send download request to master
+# Master responds with a data keeper port to download from
+#*********Client Data Keeper Side*********
+# Client calls (download_from_server(s)) to sends an upload request to data keeper
+# Data keeper calls (upload_to_client) for sending data
 def download_from_server(filename, filename_to_write, context, ip, port, start, end):
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://{}:{}".format(ip, port))
