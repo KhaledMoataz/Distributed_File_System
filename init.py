@@ -6,7 +6,7 @@ if __name__ == '__main__':
         videos = manager.dict()
         # 'file_name' : [[keeper_ids], user_id, 'file_path', size]
         keepers = manager.dict()
-        # keeper_node_id : ['ip', {port_numbers : is_busy}, is_alive]
+        # keeper_node_id : ['ip', {'port_numbers' : is_busy}, is_alive]
         
         lv = Lock()
         lk = Lock()
