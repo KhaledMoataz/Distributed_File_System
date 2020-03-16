@@ -31,7 +31,7 @@ class Replicas:
 
     def get_source(self, file):
         for machine in self.videos[file][0].keys():
-            if not self.keepers[machine][-1] or self.videos[file][0][machine]: # if not alive or not available for replication
+            if not self.keepers[machine][-1] or not self.videos[file][0][machine]: # if not alive or not available for replication
                 continue
             port = self.get_available_port(machine)
             if port != -1:
