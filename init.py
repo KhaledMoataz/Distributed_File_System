@@ -4,26 +4,24 @@ import master_core
 import master_heartbeat
 import replicates
 import functions
+import config
 
 
 def proc_replica():
-    replica_factor = 2  # input
-    replica_port = 6000  # hardcoded
-    period = 5  # input
+    replica_factor = config.replica_factor  # input
+    replica_port = config.replica_port  # hardcoded
+    period = config.replica_period  # input
 
     return Process(target=replicates.init_replica_process,
                    args=(replica_factor, replica_port, period, videos, keepers, lv, lk))
 
 
 def proc_heart_beats():
-    # hardcoded
-    init_keepers = \
-        {
-            "127.0.0.1": "5556"
-        }
-
-    functions.add_node(keepers, lk, "127.0.0.1", {"7777": False}, True)
-
+    keeper_ports = {str(port): False for port in config.keeper_ports}
+    print(keeper_ports)
+    for keeper_ip in config.keepers_ips:
+        functions.add_node(keepers, lk, keeper_ip, keeper_ports, True)
+    init_keepers = {ip: config.hearbeat_port for ip in config.keepers_ips}
     return Process(target=master_heartbeat.init_master_heartbeat_process, args=(init_keepers, keepers, lk))
 
 
@@ -43,10 +41,11 @@ if __name__ == '__main__':
         processes.append(proc_heart_beats())
         processes.append(proc_replica())
 
-        num_proc = 3  # input
+        num_proc = config.number_of_masters  # input
 
         for i in range(num_proc):
-            processes.append(Process(target=master_core.init_master_process, args=(5557 + i, videos, keepers, lv, lk)))
+            processes.append(Process(target=master_core.init_master_process,
+                                     args=(config.master_start_port + i, videos, keepers, lv, lk)))
 
         for p in processes:
             p.start()

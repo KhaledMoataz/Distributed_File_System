@@ -97,7 +97,7 @@ class Replicas:
                         self.deactivate([(src_ip, src_port), (dst_ip, dst_port)])
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))
-            print('all files have n replicas, yeah it is done :v')
+            print('all files have {} replicas, yeah it is done :v'.format(self.replica_factor))
             sleep(self.period)
 
 

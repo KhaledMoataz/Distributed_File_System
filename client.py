@@ -1,15 +1,14 @@
 import sys
-
 import zmq
-
 import transfer
+import config
 
 user_id = sys.argv[1]
-master_ip = sys.argv[2]
+master_ip = config.master_ip
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
-for i in range(3, len(sys.argv), 1):
-    socket.connect("tcp://{}:{}".format(master_ip, sys.argv[i]))
+for i in range(config.number_of_masters):
+    socket.connect("tcp://{}:{}".format(master_ip, config.master_start_port + i))
 
 command = input().split(" ")
 while command[0] != "quit":
@@ -21,7 +20,7 @@ while command[0] != "quit":
         if response is None:
             print("404: All ports are busy. Try again later :D")
         else:
-            print("Uploading...")
+            print("Uploading to {}:{}".format(response[0], response[1]))
             transfer.upload_to_server(filename, user_id, context, response[0], response[1])
             print('"{}" uploaded successfully'.format(filename))
     elif operation == "download":
@@ -32,7 +31,8 @@ while command[0] != "quit":
         elif len(response[0]) == 0:
             print("All ports are busy")
         else:
-            print("Downloading...")
+            keepers = ", ".join(["{}:{}".format(ip, port) for ip, port in zip(response[0], response[1])])
+            print("Downloading from {}".format(keepers))
             transfer.download_from_servers(filename, context, response[0], response[1], response[2])
             print('"{}" downloaded successfully'.format(filename))
     command = input().split(" ")

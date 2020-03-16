@@ -1,0 +1,21 @@
+# replica factor
+2
+# replica port
+5600
+# replica period
+5
+# heartbeat port
+5700
+# master ip
+192.168.1.36
+# number of master cores
+3
+# master core start port
+5555
+# number of dataKeeper cores on each machine
+3
+# dataKeeper core start port
+5800
+# number of dataKeeper machines followed by ips
+1
+192.168.1.36
