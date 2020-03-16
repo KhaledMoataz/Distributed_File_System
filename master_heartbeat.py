@@ -27,6 +27,8 @@ def run(socket, keepers_dict, keepers, lk):
         try:
             data_keeper_ip = socket.recv_string()
         except:
+            for key in keepers_dict:
+                functions.set_alive(keepers, lk, key, False)
             print("All data keepers are dead!")
             continue
 
@@ -35,9 +37,9 @@ def run(socket, keepers_dict, keepers, lk):
         if curr_time - last_check >= 1:
             for key in keepers_dict:
                 if curr_time - last_heart_beat[key] > 1:
-                    functions.set_alive(keepers, lk, key, 0)
+                    functions.set_alive(keepers, lk, key, False)
                 else:
-                    functions.set_alive(keepers, lk, key, 1)
+                    functions.set_alive(keepers, lk, key, True)
             last_check = curr_time
 
 

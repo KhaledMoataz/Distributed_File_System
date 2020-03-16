@@ -37,6 +37,6 @@ def set_alive(keepers, lk, node_ip, is_alive):
 def set_busy(keepers, lk, node_ip, port_no, is_busy):
     lk.acquire()
     l = keepers[node_ip]
-    l[0][port_no] = is_busy
+    l[0][str(port_no)] = is_busy
     keepers[node_ip] = l
     lk.release()

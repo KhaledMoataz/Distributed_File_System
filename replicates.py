@@ -24,7 +24,7 @@ class Replicas:
     def get_available_port(self, ip):
         r_port = -1  # keeps -1 if no port available....
         for port in self.keepers[ip][0]:
-            if self.keepers[ip][0][port]:
+            if not self.keepers[ip][0][port]:
                 r_port = port
                 break
         return r_port
