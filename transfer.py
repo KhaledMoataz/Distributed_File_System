@@ -48,16 +48,17 @@ def download_from_client(socket, filename):
     return size
 
 
-def upload_to_server(filename, context, ip, port):
+def upload_to_server(filename, user_id, context, ip, port):
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://{}:{}".format(ip, port))
-    socket.send_string("upload {}".format(filename))
+    socket.send_string("upload {} {}".format(user_id, filename))
     file = open(filename, "rb")
     has_next = True
     while has_next:
         request = socket.recv_string()
         has_next = send_chunk(file, socket, -1)
     file.close()
+    socket.disconnect("tcp://{}:{}".format(ip, port))
 
 
 # ---------------------Download---------------------
@@ -67,7 +68,9 @@ def upload_to_server(filename, context, ip, port):
 # *********Client Data Keeper Side*********
 # Client calls (download_from_server(s)) to sends an upload request to data keeper
 # Data keeper calls (upload_to_client) for sending data
-def download_from_server(filename_src, filename_dst, context, ip, port, start, end):
+def download_from_server(filename_src, context, ip, port, filename_dst=None, start=0, end=-1):
+    if filename_dst is None:
+        filename_dst = filename_src
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://{}:{}".format(ip, port))
     file = open(filename_dst, "wb")
@@ -78,10 +81,7 @@ def download_from_server(filename_src, filename_dst, context, ip, port, start, e
             break
         socket.send_string("")
     file.close()
-
-
-def download_from_server(filename, context, ip, port):
-    download_from_server(filename, filename, context, ip, port, 0, -1)
+    socket.disconnect("tcp://{}:{}".format(ip, port))
 
 
 def upload_to_client(socket, request):
@@ -98,9 +98,9 @@ def upload_to_client(socket, request):
     file.close()
 
 
-def async_download_from_server(filename, filename_to_write, context, ip, port, start, end):
+def async_download_from_server(filename_src, filename_dst, context, ip, port, start, end):
     thread = threading.Thread(target=download_from_server,
-                              args=(filename, filename_to_write, context, ip, port, start, end))
+                              args=(filename_src, context, ip, port, filename_dst, start, end))
     thread.start()
     return thread
 

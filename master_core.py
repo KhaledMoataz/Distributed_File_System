@@ -44,6 +44,8 @@ class Master:
 
             elif request.startswith("upload"):
                 keepers_used_storage = {}
+                for ip in self.keepers.keys():
+                    keepers_used_storage[ip] = 0
                 for file, data in self.videos.items():
                     for ip in data[0]:
                         keepers_used_storage[ip] += data[3]
@@ -65,10 +67,10 @@ class Master:
                 else:
                     self.socket.send_json(None)
 
-            elif request.startswith("upload success"):
-                parsed = parse.parse("success: {} {} {} {} {} {}", request)
+            elif request.startswith("successfully_uploaded"):
+                parsed = parse.parse("successfully_uploaded: {} {} {} {} {} {}", request)
                 filename = str(parsed[0])
-                data_keeper_ip = int(parsed[1])
+                data_keeper_ip = parsed[1]
                 data_keeper_port = int(parsed[2])
                 user_id = int(parsed[3])
                 file_path = str(parsed[4])
@@ -76,13 +78,15 @@ class Master:
                 add_video(self.videos, self.lv, filename, [data_keeper_ip], user_id, file_path, size)
                 set_busy(self.keepers, self.lk, data_keeper_ip, data_keeper_port, False)
                 self.socket.send_string("OK")
+                print('User: {} uploaded "{}" successfully to {}:{}'.format(user_id, filename, data_keeper_ip,
+                                                                            data_keeper_port))
 
-            elif request.startswith("download success"):
-                parsed = parse.parse("download success: {} {}", request)
-                data_keeper_ip = int(parsed[0])
+            elif request.startswith("successfully_downloaded"):
+                parsed = parse.parse("successfully_downloaded: {} {}", request)
+                data_keeper_ip = parsed[0]
                 data_keeper_port = int(parsed[1])
                 set_busy(self.keepers, self.lk, data_keeper_ip, data_keeper_port, False)
-                pass
+                self.socket.send_string("OK")
 
 
 def init_master_process(port, videos, keepers, lv, lk):

@@ -3,6 +3,7 @@ from multiprocessing import Manager, Process, Lock
 import master_core
 import master_heartbeat
 import replicates
+import functions
 
 
 def proc_replica():
@@ -18,10 +19,12 @@ def proc_heart_beats():
     # hardcoded
     init_keepers = \
         {
-            # 'ip' : 'port'
+            "127.0.0.1": "5556"
         }
 
-    return Process(target=master_heartbeat.INIT, args=(keepers, lk, init_keepers))
+    functions.add_node(keepers, lk, "127.0.0.1", {"7777": False}, True)
+
+    return Process(target=master_heartbeat.init_master_heartbeat_process, args=(init_keepers, keepers, lk))
 
 
 if __name__ == '__main__':
@@ -37,13 +40,13 @@ if __name__ == '__main__':
         lv = Lock()
         lk = Lock()
 
-        processes.append(proc_heart_beats)
-        processes.append(proc_replica)
+        processes.append(proc_heart_beats())
+        processes.append(proc_replica())
 
         num_proc = 3  # input
 
-        for _ in range(num_proc):
-            processes.append(Process(target=master_core.init_master_process, args=(videos, keepers, lv, lk)))
+        for i in range(num_proc):
+            processes.append(Process(target=master_core.init_master_process, args=(5557 + i, videos, keepers, lv, lk)))
 
         for p in processes:
             p.start()

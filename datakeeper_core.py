@@ -2,6 +2,7 @@ import parse
 import zmq
 
 import transfer
+import sys
 
 
 # As a data keeper what I need to know:
@@ -36,11 +37,17 @@ class DataKeeper:
                 filename = str(parsed[1])
                 size = transfer.download_from_client(self.socket, filename)
                 self.master_core_socket.send_string(
-                    "upload success: {} {} {} {} {} {}".format(filename, self.server_ip, self.server_port, user_id, "/",
-                                                               size))
+                    "successfully_uploaded: {} {} {} {} {} {}".format(filename, self.server_ip, self.server_port,
+                                                                      user_id, "/",
+                                                                      size))
+                self.master_core_socket.recv_string()
+
             elif request.startswith("fetch"):
                 transfer.upload_to_client(self.socket, request)
-                self.master_core_socket.send_string("download success: {} {}".format(self.server_ip, self.server_port))
+                self.master_core_socket.send_string(
+                    "successfully_downloaded: {} {}".format(self.server_ip, self.server_port))
+                self.master_core_socket.recv_string()
+
             elif request.startswith("replica"):
                 parsed_req = parse.parse('replica {} {} {}', request)
                 file_name = str(parsed_req[0])
@@ -58,3 +65,14 @@ def init_data_keeper_process(server_ip, server_port, master_ip, master_ports, re
     data_keeper = DataKeeper(server_ip, server_port)
     data_keeper.establish_connection(master_ip, master_ports, replicas_master_port)
     data_keeper.run()
+
+
+if __name__ == "__main__":
+    server_ip = sys.argv[1]
+    server_port = sys.argv[2]
+    master_ip = sys.argv[3]
+    replicas_master_port = sys.argv[4]
+    master_ports = []
+    for i in range(5, len(sys.argv), 1):
+        master_ports.append(sys.argv[i])
+    init_data_keeper_process(server_ip, server_port, master_ip, master_ports, replicas_master_port)

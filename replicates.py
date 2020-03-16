@@ -17,15 +17,14 @@ class Replicas:
         self.keepers = keepers
         self.lv = lv
         self.lk = lk
+        self.period = period
 
     # dummy look-up tables...
     # this look up table holds the Ip of each data keeper and their ports indicating available/ not available ports...
-    replica_port = sys.argv[1]
-
     def get_available_port(self, ip):
         r_port = -1  # keeps -1 if no port available....
-        for port in self.keepers[ip][1]:
-            if self.keepers[ip][1][port]:
+        for port in self.keepers[ip][0]:
+            if self.keepers[ip][0][port]:
                 r_port = port
                 break
         return r_port
@@ -39,7 +38,7 @@ class Replicas:
 
     def get_destination(self, file):
         for ip in self.keepers.keys():
-            if int(ip) in self.videos[file]:
+            if ip in self.videos[file][0]:
                 continue
             port = self.get_available_port(ip)
             if port != -1:
@@ -95,7 +94,7 @@ class Replicas:
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))
             print('all files have n replicas, yeah it is done :v')
-            sleep(period)
+            sleep(self.period)
 
 
 def init_replica_process(replica_factor, replica_port, period, videos, keepers, lv, lk):
