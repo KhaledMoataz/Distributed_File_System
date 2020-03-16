@@ -40,12 +40,3 @@ def set_busy(keepers, lk, node_ip, port_no, is_busy):
     l[0][port_no] = is_busy
     keepers[node_ip] = l
     lk.release()
-
-
-def get_keeper_ports(keepers, keeper_ip):
-    all_ports = keepers[keeper_ip][0]
-    available_ports = []
-    for port, busy in all_ports.items():
-        if not busy:
-            available_ports.append(port)
-    return available_ports

@@ -31,6 +31,8 @@ class Replicas:
 
     def get_source(self, file):
         for machine in self.videos[file][0]:
+            if not self.keepers[machine][-1]:
+                continue
             port = self.get_available_port(machine)
             if port != -1:
                 return machine, port
@@ -38,6 +40,8 @@ class Replicas:
 
     def get_destination(self, file):
         for ip in self.keepers.keys():
+            if not self.keepers[ip][-1]:
+                continue
             if ip in self.videos[file][0]:
                 continue
             port = self.get_available_port(ip)

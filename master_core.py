@@ -34,6 +34,8 @@ class Master:
                 ips = []
                 ports = []
                 for ip in keeper_ips:
+                    if not self.keepers[ip][-1]:
+                        continue
                     for port, busy in self.keepers[ip][0].items():
                         if not busy:
                             ips.append(ip)
@@ -45,15 +47,21 @@ class Master:
             elif request.startswith("upload"):
                 keepers_used_storage = {}
                 for ip in self.keepers.keys():
+                    if not self.keepers[ip][-1]:
+                        continue
                     keepers_used_storage[ip] = 0
                 for file, data in self.videos.items():
                     for ip in data[0]:
+                        if not self.keepers[ip][-1]:
+                            continue
                         keepers_used_storage[ip] += data[3]
                 keepers_ips = [ip for ip, used_storage in
                                sorted(keepers_used_storage.items(), key=lambda item: item[1])]
                 chosen_ip = None
                 chosen_port = None
                 for ip in keepers_ips:
+                    if not self.keepers[ip][-1]:
+                        continue
                     for port, busy in self.keepers[ip][0].items():
                         if not busy:
                             chosen_ip = ip
