@@ -65,9 +65,9 @@ class Replicas:
             request = socket.recv_string()
             parsed_req = parse.parse('{} {} {} {} {}', request)
             file_name = str(parsed_req[0])
-            src_ip = int(parsed_req[1])
+            src_ip = str(parsed_req[1])
             src_port = str(parsed_req[2])
-            dst_ip = int(parsed_req[3])
+            dst_ip = str(parsed_req[3])
             dst_port = str(parsed_req[4])
             # update look_up table...
             functions.replicate(self.videos, self.lv, file_name, dst_ip)
