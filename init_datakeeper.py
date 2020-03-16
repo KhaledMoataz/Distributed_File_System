@@ -2,9 +2,11 @@ from multiprocessing import Process
 from subprocess import check_output
 import datakeeper_core
 import datakeeper_heartbeat
+import sys
 from config import *
 
-server_ip = str(check_output(['hostname', '-I'])).split()[0][2:]
+# server_ip = str(check_output(['hostname', '-I'])).split()[0][2:]
+server_ip = str(sys.argv[1])
 Process(target=datakeeper_heartbeat.init_datakeeper_heartbeat_process,
         args=(server_ip, hearbeat_port)).start()
 for i in range(data_keeper_core_number):

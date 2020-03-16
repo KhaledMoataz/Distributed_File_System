@@ -21,7 +21,7 @@ class DataKeeper:
     def establish_connection(self, master_ip, master_ports, replica_port):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.socket.bind("tcp://{}:{}".format(self.server_ip, self.server_port))
+        self.socket.bind("tcp://*:{}".format(self.server_port))
         self.replicas_master_socket = self.context.socket(zmq.REQ)
         self.replicas_master_socket.connect("tcp://{}:{}".format(master_ip, replica_port))
         self.master_core_socket = self.context.socket(zmq.REQ)

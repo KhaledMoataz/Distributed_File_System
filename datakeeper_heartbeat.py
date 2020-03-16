@@ -6,7 +6,7 @@ import time
 def establish_connection(ip, port):
     context = zmq.Context()
     socket = context.socket(zmq.PUB)
-    socket.bind('tcp://{}:{}'.format(ip, port))
+    socket.bind('tcp://*:{}'.format(port))
     return socket
 
 
