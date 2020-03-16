@@ -18,7 +18,6 @@ def proc_replica():
 
 def proc_heart_beats():
     keeper_ports = {str(port): False for port in config.keeper_ports}
-    print(keeper_ports)
     for keeper_ip in config.keepers_ips:
         functions.add_node(keepers, lk, keeper_ip, keeper_ports, True)
     init_keepers = {ip: config.hearbeat_port for ip in config.keepers_ips}

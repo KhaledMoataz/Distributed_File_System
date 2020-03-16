@@ -25,10 +25,10 @@ def run(socket, keepers_dict, keepers, lk):
         last_heart_beat[key] = last_check
     while True:
         try:
-            data_keeper_ip = socket.recv()
+            data_keeper_ip = socket.recv_string()
         except:
-            print("All data keepers are dead! Master will die now :(")
-            break
+            print("All data keepers are dead!")
+            continue
 
         last_heart_beat[data_keeper_ip] = time.time()
         curr_time = time.time()
