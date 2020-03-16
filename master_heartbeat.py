@@ -4,7 +4,6 @@ import functions
 
 TIMEOUT = 2000
 
-
 def establish_connection(keepers_dict):
     context = zmq.Context()
     socket = context.socket(zmq.SUB)
@@ -35,6 +34,9 @@ def run(socket, keepers_dict, keepers, lk):
         last_heart_beat[data_keeper_ip] = time.time()
         curr_time = time.time()
         if curr_time - last_check >= 1:
+            logs = open("state.txt", "w")
+            logs.write(str(keepers).replace("],", "],\n"))
+            logs.close()
             for key in keepers_dict:
                 if curr_time - last_heart_beat[key] > 1:
                     functions.set_alive(keepers, lk, key, False)

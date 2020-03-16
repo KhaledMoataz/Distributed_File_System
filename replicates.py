@@ -74,6 +74,13 @@ class Replicas:
             socket.send_string('informed that file {} replicated in datakeeper {}'.format(file_name, dst_ip))
             self.activate([(src_ip, src_port), (dst_ip, dst_port)])
 
+    def count_file_replicas(self, filename):
+        count = 0
+        for keeper_ip in self.videos[filename][0]:
+            if self.keepers[keeper_ip][-1]:
+                count += 1
+        return count
+
     def manage_replications(self):
         rep_thread = threading.Thread(target=self.inform_replicated, args=[self.replica_port])
         rep_thread.start()
@@ -82,7 +89,7 @@ class Replicas:
         socket = context.socket(zmq.REQ)
         while True:
             for file in self.videos.keys():
-                if len(self.videos[file][0]) < self.replica_factor:
+                if self.count_file_replicas(file) < self.replica_factor:
                     src_ip, src_port = self.get_source(str(file))
                     dst_ip, dst_port = self.get_destination(str(file))
                     if src_port == -1:
