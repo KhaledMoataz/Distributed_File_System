@@ -53,7 +53,8 @@ class DataKeeper:
                 file_name = str(parsed_req[0])
                 source_ip = str(parsed_req[1])
                 source_port = str(parsed_req[2])
-                self.socket.send_string('replicating file: {}.....'.format(file_name))
+                self.socket.send_string(
+                    'replicating file: {} from {} to {}'.format(file_name, source_ip, self.server_ip))
                 transfer.download_from_server(file_name, self.context, source_ip, source_port)
                 self.replicas_master_socket.send_string(
                     '{} {} {} {} {}'.format(file_name, source_ip, source_port, self.server_ip, self.server_port))
