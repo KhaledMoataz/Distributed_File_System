@@ -17,6 +17,8 @@
 # dataKeeper core start port
 5800
 # number of dataKeeper machines followed by ips
-2
+4
 41.42.4.97
 156.214.114.182
+41.238.231.232
+149.56.182.83
