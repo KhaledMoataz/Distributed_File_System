@@ -7,7 +7,7 @@ import functions
 
 
 def proc_replica():
-    replica_factor = 3  # input
+    replica_factor = 2  # input
     replica_port = 6000  # hardcoded
     period = 5  # input
 

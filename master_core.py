@@ -17,7 +17,7 @@ class Master:
         self.lk = lk
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.socket.bind("tcp://{}:{}".format("127.0.0.1", port))
+        self.socket.bind("tcp://{}:{}".format("*", port))
 
     def run(self):
         while True:

@@ -60,7 +60,7 @@ class Replicas:
     def inform_replicated(self, replica_port):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
-        socket.bind('tcp://127.0.0.1:{}'.format(replica_port))
+        socket.bind('tcp://*:{}'.format(replica_port))
         while True:
             request = socket.recv_string()
             parsed_req = parse.parse('{} {} {} {} {}', request)
