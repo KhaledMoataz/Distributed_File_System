@@ -83,7 +83,7 @@ class Master:
                 user_id = int(parsed[3])
                 file_path = str(parsed[4])
                 size = int(parsed[5])
-                add_video(self.videos, self.lv, filename, [data_keeper_ip], user_id, file_path, size)
+                add_video(self.videos, self.lv, filename, {data_keeper_ip : True}, user_id, file_path, size)
                 set_busy(self.keepers, self.lk, data_keeper_ip, data_keeper_port, False)
                 self.socket.send_string("OK")
                 print('User: {} uploaded "{}" successfully to {}:{}'.format(user_id, filename, data_keeper_ip,

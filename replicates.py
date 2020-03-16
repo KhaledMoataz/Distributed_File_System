@@ -30,8 +30,8 @@ class Replicas:
         return r_port
 
     def get_source(self, file):
-        for machine in self.videos[file][0]:
-            if not self.keepers[machine][-1]:
+        for machine in self.videos[file][0].keys():
+            if not self.keepers[machine][-1] or self.videos[file][0][machine]: # if not alive or not available for replication
                 continue
             port = self.get_available_port(machine)
             if port != -1:
@@ -42,7 +42,7 @@ class Replicas:
         for ip in self.keepers.keys():
             if not self.keepers[ip][-1]:
                 continue
-            if ip in self.videos[file][0]:
+            if ip in self.videos[file][0].keys():
                 continue
             port = self.get_available_port(ip)
             if port != -1:
@@ -70,13 +70,13 @@ class Replicas:
             dst_ip = str(parsed_req[3])
             dst_port = str(parsed_req[4])
             # update look_up table...
-            functions.replicate(self.videos, self.lv, file_name, dst_ip)
+            functions.finish_replicate(self.videos, self.lv, file_name, dst_ip)
             socket.send_string('informed that file {} replicated in datakeeper {}'.format(file_name, dst_ip))
             self.activate([(src_ip, src_port), (dst_ip, dst_port)])
 
     def count_file_replicas(self, filename):
         count = 0
-        for keeper_ip in self.videos[filename][0]:
+        for keeper_ip in self.videos[filename][0].keys():
             if self.keepers[keeper_ip][-1]:
                 count += 1
         return count
@@ -101,6 +101,7 @@ class Replicas:
                         request = 'replica {} {} {}'.format(file, src_ip, src_port)
                         socket.send_string(request)
                         response = socket.recv_string()
+                        functions.start_replicate(self.videos, self.lv, file, dst_ip)
                         self.deactivate([(src_ip, src_port), (dst_ip, dst_port)])
                         print(response)
                         socket.disconnect('tcp://{}:{}'.format(dst_ip, dst_port))

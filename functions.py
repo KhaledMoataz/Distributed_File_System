@@ -18,10 +18,18 @@ def add_port(keepers, lk, node_ip, port_no, is_busy):
     lk.release()
 
 
-def replicate(videos, lv, name, node_ip):
+def start_replicate(videos, lv, name, node_ip):
     lv.acquire()
     l = videos[name]
-    l[0].append(node_ip)
+    l[0][node_ip] = False
+    videos[name] = l
+    lv.release()
+
+
+def finish_replicate(videos, lv, name, node_ip):
+    lv.acquire()
+    l = videos[name]
+    l[0][node_ip] = True
     videos[name] = l
     lv.release()
 

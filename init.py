@@ -30,7 +30,7 @@ if __name__ == '__main__':
         processes = []
 
         videos = manager.dict()
-        # 'file_name' : [[keeper_ids], user_id, 'file_path', size]
+        # 'file_name' : [{'keeper_ids' : available}, user_id, 'file_path', size]
         keepers = manager.dict()
         # 'keeper_node_ip' : [{'port_numbers' : is_busy}, is_alive]
 
