@@ -3,7 +3,7 @@
 # replica port
 5600
 # replica period
-5
+10
 # heartbeat port
 5700
 # master ip

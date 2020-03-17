@@ -28,21 +28,26 @@ def run(socket, keepers_dict, keepers, lk):
         except:
             for key in keepers_dict:
                 functions.set_alive(keepers, lk, key, False)
+            log(keepers)
             print("All data keepers are dead!")
             continue
 
         last_heart_beat[data_keeper_ip] = time.time()
         curr_time = time.time()
-        if curr_time - last_check >= 1:
-            logs = open("state.txt", "w")
-            logs.write(str(keepers).replace("],", "],\n"))
-            logs.close()
+        if curr_time - last_check >= 2:
+            log(keepers)
             for key in keepers_dict:
-                if curr_time - last_heart_beat[key] > 1:
+                if curr_time - last_heart_beat[key] > 2:
                     functions.set_alive(keepers, lk, key, False)
                 else:
                     functions.set_alive(keepers, lk, key, True)
             last_check = curr_time
+
+
+def log(keepers):
+    logs = open("state.txt", "w")
+    logs.write(str(keepers).replace("],", "],\n"))
+    logs.close()
 
 
 def init_master_heartbeat_process(keepers_dict, keepers, lk):
