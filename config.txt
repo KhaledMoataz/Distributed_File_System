@@ -7,7 +7,7 @@
 # heartbeat port
 5700
 # master ip
-156.214.114.182
+156.214.75.229
 # number of master cores
 3
 # master core start port
@@ -17,8 +17,7 @@
 # dataKeeper core start port
 5800
 # number of dataKeeper machines followed by ips
-4
-41.42.4.97
-156.214.114.182
-41.238.231.232
+3
+41.35.0.78
+156.214.75.229
 149.56.182.83
